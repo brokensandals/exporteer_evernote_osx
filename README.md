@@ -1,7 +1,7 @@
 # exporteer\_evernote\_osx
 
 This is a very simple tool for exporting data from Evernote.
-It uses AppleScript to tell Mac Evernote app to perform an export.
+It uses AppleScript to tell the Mac Evernote app to perform an export.
 
 ## Development
 
