@@ -11,9 +11,13 @@ def _export(args):
         fmt = 'ENEX'
     else:
         fmt = 'HTML'
-    if not enapp.export(args.path[0], fmt, args.query):
+
+    if args.by_notebook:
+        enapp.export_by_notebook(args.path[0], fmt, args.query)
+    elif not enapp.export(args.path[0], fmt, args.query):
         print('no notes matched query', file=sys.stderr)
         return 3
+
     return 0
 
 
@@ -53,17 +57,22 @@ def main(args=None):
         help='export notes to file or directory')
     p_export.add_argument(
         'path', nargs=1,
-        help='path to target directory (for HTML) or file (for ENEX)')
+        help='path to target file or directory')
     p_export.add_argument(
         '-q', '--query', nargs='?',
         help='Evernote query for notes to export (defaults to all notes)')
     p_export_fmts = p_export.add_mutually_exclusive_group()
     p_export_fmts.add_argument(
         '-E', '--enex', action='store_true',
-        help='export as enex file')
+        help='export as enex to target file (or multiple enex in target '
+             'directory if --by-notebook argument is used)')
     p_export_fmts.add_argument(
         '-H', '--html', action='store_true',
-        help='export as html files (default')
+        help='export as html files into target directory (default')
+    p_export.add_argument(
+        '-n', '--by-notebook', action='store_true',
+        help='export each notebook to a separate file/directory within '
+             'target directory')
     p_export.set_defaults(func=_export)
 
     p_notebooks = subs.add_parser(

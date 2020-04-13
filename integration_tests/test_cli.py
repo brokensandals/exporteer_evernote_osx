@@ -32,12 +32,31 @@ def test_export_enex():
         assert path.stat().st_size > 100
 
 
+def test_export_enex_by_notebook():
+    with TemporaryDirectory() as rawpath:
+        path = Path(rawpath).joinpath('test').resolve()
+        assert cli.main(['export', str(path), '-Enq', 'created:month']) == 0
+        assert path.is_dir()
+        files = list(path.glob('*.enex'))
+        assert len(files) > 1
+        assert files[0].stat().st_size > 100
+
+
 def test_export_html():
     with TemporaryDirectory() as rawpath:
         path = Path(rawpath).joinpath('test').resolve()
         assert cli.main(['export', str(path), '-q', 'created:month']) == 0
         assert path.is_dir()
         assert len(list(path.glob('*.html'))) > 0
+
+
+def test_export_html_by_notebook():
+    with TemporaryDirectory() as rawpath:
+        path = Path(rawpath).joinpath('test').resolve()
+        assert cli.main(['export', str(path), '-nq', 'created:month']) == 0
+        assert path.is_dir()
+        assert len(list(path.glob('*/'))) > 1
+        assert len(list(path.glob('*/*.html'))) > 1
 
 
 def test_export_no_matches():
