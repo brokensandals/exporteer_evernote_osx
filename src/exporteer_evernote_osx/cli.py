@@ -73,7 +73,7 @@ def main(args=None):
         '-n', '--by-notebook', action='store_true',
         help='export each notebook to a separate file/directory within '
              'target directory')
-    p_export.set_defaults(func=_export)
+    p_export.set_defaults(func=_export, query='')
 
     p_notebooks = subs.add_parser(
         'notebooks',
