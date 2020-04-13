@@ -43,5 +43,4 @@ def test_export_html():
 def test_export_no_matches():
     with TemporaryDirectory() as rawpath:
         path = Path(rawpath).joinpath('test.enex').resolve()
-        with pytest.raises(Exception):
-            cli.main(['export', path, '-Eq', 'tag:totallybogustag'])
+        assert cli.main(['export', str(path), '-Eq', 'tag:totallybogustag']) == 3

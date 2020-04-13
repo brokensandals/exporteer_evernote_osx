@@ -11,7 +11,9 @@ def _export(args):
         fmt = 'ENEX'
     else:
         fmt = 'HTML'
-    enapp.export(args.path[0], fmt, args.query)
+    if not enapp.export(args.path[0], fmt, args.query):
+        print('no notes matched query', file=sys.stderr)
+        return 3
     return 0
 
 

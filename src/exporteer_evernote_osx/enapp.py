@@ -1,5 +1,6 @@
 """Allows interacting with the Evernote OSX app."""
 
+from pathlib import Path
 import re
 from string import Template
 import subprocess
@@ -26,7 +27,13 @@ end tell
 
 _EXPORT_SCRIPT = Template("""
 tell application "Evernote"
-    export (find notes "$query") to (POSIX file "$dest") format $fmt
+    set results to (find notes "$query")
+    if (count of results) > 0 then
+        export (find notes "$query") to (POSIX file "$dest") format $fmt
+        true
+    else
+        false
+    end if
 end tell
 """)
 
@@ -79,9 +86,7 @@ def _script_escape(string):
 
 
 def export(dest, fmt='HTML', query=''):
-    """Exports notes.
-
-    This method will raise an error if there are no matching notes.
+    """Exports notes. Returns False if no notes match the query.
 
     fmt should be HTML or ENEX.
     dest should be a string path name. For fmt=HTML it should be the
@@ -90,6 +95,9 @@ def export(dest, fmt='HTML', query=''):
 
     query is the Evernote search query for choosing which notes to export.
     It defaults to an empty string, which should match all notes.
+
+    If there are no matches, the method returns False and there may be
+    no output files.
     """
     dest_esc = _script_escape(dest)
     query_esc = _script_escape(query)
@@ -98,4 +106,29 @@ def export(dest, fmt='HTML', query=''):
         'fmt': fmt,
         'query': query_esc,
     })
-    subprocess.check_call(['osascript', '-e', script])
+    result = subprocess.check_output(['osascript', '-e', script, '-ss'])
+    return str(result, 'utf-8').strip() == 'true'
+
+
+def export_by_notebook(dest, fmt='HTML', query=''):
+    """Exports notes into separate files/folders per notebook.
+
+    This is like the export method, except dest should be a directory,
+    which will be populated with a separate file or folder for each
+    notebook for which there are notes matching the query.
+
+    The query must not contain the string "notebook".
+    """
+    if 'notebook' in query:
+        # If two notebooks are specified in the search query, the results
+        # will include notes from both. Raising an error is easier than
+        # trying to parse/modify the query to make it work.
+        raise Exception('query must not contain notebook')
+    dest = Path(dest)
+    dest.mkdir(parents=True, exist_ok=True)
+    for name in list_notebooks():
+        nbdest = dest.joinpath(name)
+        if fmt == 'ENEX':
+            nbdest = nbdest.with_suffix('.enex')
+        nbquery = f'notebook:"{name}" {query}'
+        export(str(nbdest), fmt=fmt, query=nbquery)
