@@ -1,10 +1,29 @@
 from pathlib import Path
+import re
 from tempfile import TemporaryDirectory
+import pytest
 from exporteer_evernote_osx import cli
+
+
+def test_help(capsys):
+    doc = Path('doc')
+    with pytest.raises(SystemExit):
+        cli.main(['-h'])
+    cap = capsys.readouterr()
+    doc.joinpath('usage.txt').write_text(
+        cap.out.replace('pytest', 'exporteer_evernote_osx'))
+    cmds = re.search('\\{(.+)\\}', cap.out).group(1)
+    for cmd in cmds.split(','):
+        with pytest.raises(SystemExit):
+            cli.main([cmd, '-h'])
+        cap = capsys.readouterr()
+        doc.joinpath(f'usage-{cmd}.txt').write_text(
+            cap.out.replace('pytest', 'exporteer_evernote_osx'))
 
 
 # I don't know of a good way to actually test that the sync commands
 # work, but we can at least test that they run without crashing.
+
 
 def test_sync():
     assert cli.main(['sync']) == 0

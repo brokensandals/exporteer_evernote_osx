@@ -27,13 +27,15 @@ end tell
 
 _EXPORT_SCRIPT = Template("""
 tell application "Evernote"
-    set results to (find notes "$query")
-    if (count of results) > 0 then
-        export (find notes "$query") to (POSIX file "$dest") format $fmt
-        true
-    else
-        false
-    end if
+    with timeout of $timeout seconds
+        set results to (find notes "$query")
+        if (count of results) > 0 then
+            export (find notes "$query") to (POSIX file "$dest") format $fmt
+            true
+        else
+            false
+        end if
+    end timeout
 end tell
 """)
 
@@ -85,7 +87,7 @@ def _script_escape(string):
     return string.replace('\\', '\\\\').replace('"', '\\"')
 
 
-def export(dest, fmt='HTML', query=''):
+def export(dest, fmt='HTML', query='', timeout_seconds=30*60):
     """Exports notes. Returns False if no notes match the query.
 
     fmt should be HTML or ENEX.
@@ -105,12 +107,13 @@ def export(dest, fmt='HTML', query=''):
         'dest': dest_esc,
         'fmt': fmt,
         'query': query_esc,
+        'timeout': timeout_seconds,
     })
     result = subprocess.check_output(['osascript', '-e', script, '-ss'])
     return str(result, 'utf-8').strip() == 'true'
 
 
-def export_by_notebook(dest, fmt='HTML', query=''):
+def export_by_notebook(dest, fmt='HTML', query='', timeout_seconds=30*60):
     """Exports notes into separate files/folders per notebook.
 
     This is like the export method, except dest should be a directory,
@@ -118,6 +121,8 @@ def export_by_notebook(dest, fmt='HTML', query=''):
     notebook for which there are notes matching the query.
 
     The query must not contain the string "notebook".
+
+    The timeout is applied to each notebook, rather than the entire export.
     """
     if 'notebook' in query:
         # If two notebooks are specified in the search query, the results
@@ -131,4 +136,5 @@ def export_by_notebook(dest, fmt='HTML', query=''):
         if fmt == 'ENEX':
             nbdest = nbdest.with_suffix('.enex')
         nbquery = f'notebook:"{name}" {query}'
-        export(str(nbdest), fmt=fmt, query=nbquery)
+        export(str(nbdest), fmt=fmt, query=nbquery,
+               timeout_seconds=timeout_seconds)

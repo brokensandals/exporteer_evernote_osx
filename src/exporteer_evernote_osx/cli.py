@@ -13,8 +13,8 @@ def _export(args):
         fmt = 'HTML'
 
     if args.by_notebook:
-        enapp.export_by_notebook(args.path[0], fmt, args.query)
-    elif not enapp.export(args.path[0], fmt, args.query):
+        enapp.export_by_notebook(args.path[0], fmt, args.query, args.timeout)
+    elif not enapp.export(args.path[0], fmt, args.query, args.timeout):
         print('no notes matched query', file=sys.stderr)
         return 3
 
@@ -73,7 +73,10 @@ def main(args=None):
         '-n', '--by-notebook', action='store_true',
         help='export each notebook to a separate file/directory within '
              'target directory')
-    p_export.set_defaults(func=_export, query='')
+    p_export.add_argument(
+        '-t', '--timeout', nargs='?', type=int,
+        help='timeout for export operations (default 1800 = 30 min)')
+    p_export.set_defaults(func=_export, query='', timeout=30*60)
 
     p_notebooks = subs.add_parser(
         'notebooks',

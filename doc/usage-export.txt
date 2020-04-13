@@ -1,4 +1,4 @@
-usage: exporteer_evernote_osx export [-h] [-q [QUERY]] [-E | -H] [-n] path
+usage: exporteer_evernote_osx export [-h] [-q [QUERY]] [-E | -H] [-n] [-t [TIMEOUT]] path
 
 positional arguments:
   path                  path to target file or directory
@@ -13,3 +13,5 @@ optional arguments:
   -H, --html            export as html files into target directory (default)
   -n, --by-notebook     export each notebook to a separate file/directory
                         within target directory
+  -t [TIMEOUT], --timeout [TIMEOUT]
+                        timeout for export operations (default 1800 = 30 min)
