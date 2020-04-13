@@ -39,6 +39,8 @@ def test_export_enex_by_notebook():
         files = list(path.glob('*.enex'))
         assert len(files) > 1
         assert files[0].stat().st_size > 100
+        assert files[1].stat().st_size > 100
+        assert files[0].read_text() != files[1].read_text()
 
 
 def test_export_html():
@@ -54,8 +56,13 @@ def test_export_html_by_notebook():
         path = Path(rawpath).joinpath('test').resolve()
         assert cli.main(['export', str(path), '-nq', 'created:month']) == 0
         assert path.is_dir()
-        assert len(list(path.glob('*/'))) > 1
-        assert len(list(path.glob('*/*.html'))) > 1
+        dirs = list(path.glob('*/'))
+        assert len(dirs) > 1
+        files1 = list(dirs[0].glob('*.html'))
+        files2 = list(dirs[1].glob('*.html'))
+        assert len(files1) > 0
+        assert len(files2) > 0
+        assert [f.name for f in files1] != [f.name for f in files2]
 
 
 def test_export_no_matches():
