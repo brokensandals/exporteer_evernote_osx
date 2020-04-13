@@ -48,7 +48,7 @@ Setup:
    pip install -r requirements-dev.txt
     ```
 
-To run integration tests:
+To run integration tests (these assume you've created at least a couple notes this month in a couple different notebooks):
 
 ```bash
 PYTHONPATH=src pytest
