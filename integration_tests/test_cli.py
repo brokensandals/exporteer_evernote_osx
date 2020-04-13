@@ -14,3 +14,9 @@ def test_sync_immediate():
 
 def test_sync_time_options():
     assert cli.main(['sync', '-d', '5', '-t', '10']) in [0, 2]
+
+
+def test_list_notebooks(capsys):
+    assert cli.main(['notebooks']) == 0
+    cap = capsys.readouterr()
+    assert len(cap.out.splitlines()) > 1

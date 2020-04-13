@@ -1,5 +1,6 @@
 """Allows interacting with the Evernote OSX app."""
 
+import re
 import subprocess
 import time
 
@@ -10,12 +11,22 @@ tell application "Evernote"
 end tell 
 """
 
-
 _CHECK_SYNC_SCRIPT = """
 tell application "Evernote"
     isSynchronizing
 end tell
 """
+
+_LIST_NOTEBOOKS_SCRIPT = """
+tell application "Evernote"
+    name of notebooks
+end tell
+"""
+
+# This is a very hacky/incomplete way of parsing AppleScript results,
+# and would give wrong results for notebook names containing quotation
+# marks.
+_NOTEBOOK_NAMES_RE = re.compile('"(.+?)"')
 
 
 class SyncTimeoutException(Exception):
@@ -46,3 +57,11 @@ def await_sync(timeout_seconds=60*30, delay_seconds=10):
             raise SyncTimeoutException(
                 f'waited {timeout_seconds} seconds but sync did not finish')
         time.sleep(delay_seconds)
+
+
+def list_notebooks():
+    """Returns a list of notebook names.
+    """
+    out = subprocess.check_output(
+        ['osascript', '-e', _LIST_NOTEBOOKS_SCRIPT, '-ss'])
+    return _NOTEBOOK_NAMES_RE.findall(str(out, 'utf-8'))

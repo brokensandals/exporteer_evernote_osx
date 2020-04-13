@@ -6,6 +6,12 @@ import sys
 from exporteer_evernote_osx import enapp
 
 
+def _notebooks(args):
+    for name in enapp.list_notebooks():
+        print(name)
+    return 0
+
+
 def _sync(args):
     enapp.start_sync()
     if args.immediate:
@@ -30,6 +36,11 @@ def main(args=None):
     parser.set_defaults(func=None)
 
     subs = parser.add_subparsers(title='Commands')
+
+    p_notebooks = subs.add_parser(
+        'notebooks',
+        help='list notebooks')
+    p_notebooks.set_defaults(func=_notebooks)
 
     p_sync = subs.add_parser(
         'sync',
