@@ -79,6 +79,18 @@ def _script_escape(string):
 
 
 def export(dest, fmt='HTML', query=''):
+    """Exports notes.
+
+    This method will raise an error if there are no matching notes.
+
+    fmt should be HTML or ENEX.
+    dest should be a string path name. For fmt=HTML it should be the
+    target dir; for fmt=ENEX it should be the target file. The dest
+    does not need to exist yet.
+
+    query is the Evernote search query for choosing which notes to export.
+    It defaults to an empty string, which should match all notes.
+    """
     dest_esc = _script_escape(dest)
     query_esc = _script_escape(query)
     script = _EXPORT_SCRIPT.substitute({
