@@ -1,3 +1,6 @@
+from pathlib import Path
+import pytest
+from tempfile import TemporaryDirectory
 from exporteer_evernote_osx import cli
 
 
@@ -20,3 +23,25 @@ def test_list_notebooks(capsys):
     assert cli.main(['notebooks']) == 0
     cap = capsys.readouterr()
     assert len(cap.out.splitlines()) > 1
+
+
+def test_export_enex():
+    with TemporaryDirectory() as rawpath:
+        path = Path(rawpath).joinpath('test.enex').resolve()
+        assert cli.main(['export', str(path), '-Eq', 'created:month']) == 0
+        assert path.stat().st_size > 100
+
+
+def test_export_html():
+    with TemporaryDirectory() as rawpath:
+        path = Path(rawpath).joinpath('test').resolve()
+        assert cli.main(['export', str(path), '-q', 'created:month']) == 0
+        assert path.is_dir()
+        assert len(list(path.glob('*.html'))) > 0
+
+
+def test_export_no_matches():
+    with TemporaryDirectory() as rawpath:
+        path = Path(rawpath).joinpath('test.enex').resolve()
+        with pytest.raises(Exception):
+            cli.main(['export', path, '-Eq', 'tag:totallybogustag'])

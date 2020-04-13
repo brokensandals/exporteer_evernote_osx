@@ -6,6 +6,15 @@ import sys
 from exporteer_evernote_osx import enapp
 
 
+def _export(args):
+    if args.enex:
+        fmt = 'ENEX'
+    else:
+        fmt = 'HTML'
+    enapp.export(args.path[0], fmt, args.query)
+    return 0
+
+
 def _notebooks(args):
     for name in enapp.list_notebooks():
         print(name)
@@ -36,6 +45,24 @@ def main(args=None):
     parser.set_defaults(func=None)
 
     subs = parser.add_subparsers(title='Commands')
+
+    p_export = subs.add_parser(
+        'export',
+        help='export notes to file or directory')
+    p_export.add_argument(
+        'path', nargs=1,
+        help='path to target directory (for HTML) or file (for ENEX)')
+    p_export.add_argument(
+        '-q', '--query', nargs='?',
+        help='Evernote query for notes to export (defaults to all notes)')
+    p_export_fmts = p_export.add_mutually_exclusive_group()
+    p_export_fmts.add_argument(
+        '-E', '--enex', action='store_true',
+        help='export as enex file')
+    p_export_fmts.add_argument(
+        '-H', '--html', action='store_true',
+        help='export as html files (default')
+    p_export.set_defaults(func=_export)
 
     p_notebooks = subs.add_parser(
         'notebooks',

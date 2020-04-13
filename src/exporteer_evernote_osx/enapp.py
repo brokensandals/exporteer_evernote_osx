@@ -1,6 +1,7 @@
 """Allows interacting with the Evernote OSX app."""
 
 import re
+from string import Template
 import subprocess
 import time
 
@@ -22,6 +23,12 @@ tell application "Evernote"
     name of notebooks
 end tell
 """
+
+_EXPORT_SCRIPT = Template("""
+tell application "Evernote"
+    export (find notes "$query") to (POSIX file "$dest") format $fmt
+end tell
+""")
 
 # This is a very hacky/incomplete way of parsing AppleScript results,
 # and would give wrong results for notebook names containing quotation
@@ -65,3 +72,18 @@ def list_notebooks():
     out = subprocess.check_output(
         ['osascript', '-e', _LIST_NOTEBOOKS_SCRIPT, '-ss'])
     return _NOTEBOOK_NAMES_RE.findall(str(out, 'utf-8'))
+
+
+def _script_escape(string):
+    return string.replace('\\', '\\\\').replace('"', '\\"')
+
+
+def export(dest, fmt='HTML', query=''):
+    dest_esc = _script_escape(dest)
+    query_esc = _script_escape(query)
+    script = _EXPORT_SCRIPT.substitute({
+        'dest': dest_esc,
+        'fmt': fmt,
+        'query': query_esc,
+    })
+    subprocess.check_call(['osascript', '-e', script])
