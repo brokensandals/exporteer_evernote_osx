@@ -1,5 +1,4 @@
 from pathlib import Path
-import pytest
 from tempfile import TemporaryDirectory
 from exporteer_evernote_osx import cli
 

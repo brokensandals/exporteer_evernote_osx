@@ -1,0 +1,9 @@
+usage: exporteer_evernote_osx sync [-h] [-d DELAY] [-i] [-t TIMEOUT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d DELAY, --delay DELAY
+                        seconds to wait between each poll (default 10)
+  -i, --immediate       return immediately without waiting for sync to finish
+  -t TIMEOUT, --timeout TIMEOUT
+                        seconds to wait before failing (default 1800 = 30 min)

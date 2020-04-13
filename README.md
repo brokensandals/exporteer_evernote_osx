@@ -3,6 +3,33 @@
 This is a very simple tool for exporting data from Evernote.
 It uses AppleScript to tell the Mac Evernote app to perform an export.
 
+## Usage
+
+Install:
+
+1. Install python3 and pip
+2. `pip3 install exporteer_evernote_osx`
+
+Before running an export, you might wish to ensure the app has synced with the cloud:
+
+```bash
+exporteer_evernote_osx sync
+```
+
+To export all your notes to HTML files, with each notebook in a separate subdirectory:
+
+```bash
+exporteer_evernote_osx export -n TARGET_DIR
+```
+
+To export all notes matching a query (for instance, notes created this year) to an enex file:
+
+```bash
+exporteer_evernote_osx export -Eq 'created:year' TARGET_FILE.enex
+```
+
+Full command list and options can be seen in the [doc folder](doc/).
+
 ## Development
 
 Setup:

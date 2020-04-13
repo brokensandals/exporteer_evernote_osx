@@ -1,0 +1,10 @@
+usage: exporteer_evernote_osx [-h] {export,notebooks,sync} ...
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Commands:
+  {export,notebooks,sync}
+    export              export notes to file or directory
+    notebooks           list notebooks
+    sync                tell app to synchronize and wait for it to finish

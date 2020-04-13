@@ -1,0 +1,15 @@
+usage: exporteer_evernote_osx export [-h] [-q [QUERY]] [-E | -H] [-n] path
+
+positional arguments:
+  path                  path to target file or directory
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -q [QUERY], --query [QUERY]
+                        Evernote query for notes to export (defaults to all
+                        notes)
+  -E, --enex            export as enex to target file (or multiple enex in
+                        target directory if --by-notebook argument is used)
+  -H, --html            export as html files into target directory (default)
+  -n, --by-notebook     export each notebook to a separate file/directory
+                        within target directory

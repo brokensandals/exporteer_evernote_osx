@@ -68,7 +68,7 @@ def main(args=None):
              'directory if --by-notebook argument is used)')
     p_export_fmts.add_argument(
         '-H', '--html', action='store_true',
-        help='export as html files into target directory (default')
+        help='export as html files into target directory (default)')
     p_export.add_argument(
         '-n', '--by-notebook', action='store_true',
         help='export each notebook to a separate file/directory within '
