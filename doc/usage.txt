@@ -1,10 +1,13 @@
-usage: exporteer_evernote_osx [-h] {export,notebooks,sync} ...
+usage: exporteer_evernote_osx [-h] {export,notebooks,relink,sync} ...
 
 optional arguments:
   -h, --help            show this help message and exit
 
 Commands:
-  {export,notebooks,sync}
+  {export,notebooks,relink,sync}
     export              export notes to file or directory
     notebooks           list notebooks
+    relink              replace evernote:// links in html files within a
+                        directory (assumes the files have an evernote-url meta
+                        tag, produced by running this tool in enhanced mode)
     sync                tell app to synchronize and wait for it to finish

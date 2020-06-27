@@ -28,6 +28,27 @@ To export all notes matching a query (for instance, notes created this year) to 
 exporteer_evernote_osx export -Eq 'created:year' TARGET_FILE.enex
 ```
 
+### Links between notes
+
+Evernote's export functionality does not embed the note's unique identifier, or the name of the notebook to which the note belongs, into the HTML or enex files.
+Also, any links between notes are exported as links into the Evernote app, rather than links between the files.
+
+To address these limitations, you can run this tool in 'enhanced' mode:
+
+```bash
+exporteer_evernote_osx export -e TARGET_DIR
+```
+
+In this mode, the tool modifies the HTML files after export to add extra metadata fields containing the notebook name and note URL.
+
+After exporting in enhanced mode, you can replace the `evernote://` links in the HTML files with links to the corresponding exported files, by using the `relink` command:
+
+```bash
+exporteer_evernote_osx relink EXPORT_DIR
+```
+
+### More documentation
+
 Full command list and options can be seen in the [doc folder](doc/).
 
 ## Development

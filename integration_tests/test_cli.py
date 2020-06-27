@@ -84,6 +84,27 @@ def test_export_html_by_notebook():
         assert [f.name for f in files1] != [f.name for f in files2]
 
 
+def test_export_enhanced_and_relink():
+    with TemporaryDirectory() as rawpath:
+        path = Path(rawpath).joinpath('test').resolve()
+        assert cli.main(['export', str(path), '-eq', 'created:month']) == 0
+        assert path.is_dir()
+        files = list(path.glob('*.html'))
+        assert len(files) > 0
+        for file in files:
+            text = file.read_text()
+            assert '<meta name="evernote-notebook" content="' in text
+            assert '<meta name="evernote-url" content="evernote:///' in text
+        assert cli.main(['relink', str(path)]) == 0
+        for file in files:
+            text = file.read_text()
+            assert '<meta name="evernote-notebook" content="' in text
+            assert '<meta name="evernote-url" content="evernote:///' in text
+            # Ideally I'd make the following assertion, but it doesn't
+            # really work unless you're exporting all notes, which is slow.
+            # assert text.count('evernote://') == 1
+
+
 def test_export_no_matches():
     with TemporaryDirectory() as rawpath:
         path = Path(rawpath).joinpath('test.enex').resolve()

@@ -12,7 +12,11 @@ def _export(args):
     else:
         fmt = 'HTML'
 
-    if args.by_notebook:
+    if args.enhanced:
+        if not enapp.export_enhanced(args.path[0], fmt, args.query, args.timeout):
+            print('no notes matched query', file=sys.stderr)
+            return 3
+    elif args.by_notebook:
         enapp.export_by_notebook(args.path[0], fmt, args.query, args.timeout)
     elif not enapp.export(args.path[0], fmt, args.query, args.timeout):
         print('no notes matched query', file=sys.stderr)
@@ -24,6 +28,11 @@ def _export(args):
 def _notebooks(args):
     for name in enapp.list_notebooks():
         print(name)
+    return 0
+
+
+def _relink(args):
+    enapp.relink(args.path[0])
     return 0
 
 
@@ -69,7 +78,13 @@ def main(args=None):
     p_export_fmts.add_argument(
         '-H', '--html', action='store_true',
         help='export as html files into target directory (default)')
-    p_export.add_argument(
+    p_export_strategies = p_export.add_mutually_exclusive_group()
+    p_export_strategies.add_argument(
+        '-e', '--enhanced', action='store_true',
+        help='add metadata to each note containing the notebook name '
+             'and note URL, and change hyperlinks between notes into '
+             'links to the HTML files. Cannot be used with enex format.')
+    p_export_strategies.add_argument(
         '-n', '--by-notebook', action='store_true',
         help='export each notebook to a separate file/directory within '
              'target directory')
@@ -82,6 +97,17 @@ def main(args=None):
         'notebooks',
         help='list notebooks')
     p_notebooks.set_defaults(func=_notebooks)
+
+    p_relink = subs.add_parser(
+        'relink',
+        help='replace evernote:// links in html files within a directory '
+             '(assumes the files have an evernote-url meta tag, produced '
+             'by running this tool in enhanced mode)')
+    p_relink.add_argument(
+        'path', nargs=1,
+        help='path to directory, which should have been produced by '
+             'running `exporteer_evernote_osx export -e` previously')
+    p_relink.set_defaults(func=_relink)
 
     p_sync = subs.add_parser(
         'sync',

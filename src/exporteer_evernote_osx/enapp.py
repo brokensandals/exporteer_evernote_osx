@@ -39,10 +39,33 @@ tell application "Evernote"
 end tell
 """)
 
+_EXPORT_BY_NOTE_SCRIPT = Template("""
+tell application "Evernote"
+    with timeout of $timeout seconds
+        set results to (find notes "$query")
+        set metaList to {}
+        set theNoteIndex to 1
+        repeat with theNote in results
+            set metaText to (name of notebook of theNote) & "~" & (note link of theNote)
+            set metaList to metaList & {metaText}
+            export {theNote} to (POSIX file ("$dest/" & theNoteIndex)) format $fmt
+            set theNoteIndex to theNoteIndex + 1
+        end repeat
+        metaList
+    end timeout
+end tell
+""")
+
 # This is a very hacky/incomplete way of parsing AppleScript results,
 # and would give wrong results for notebook names containing quotation
 # marks.
 _NOTEBOOK_NAMES_RE = re.compile('"(.+?)"')
+
+# And this would give wrong results if you have quotes or tildes...
+_EXTRA_META_RE = re.compile('"(.+?)~(.+?)"')
+
+
+URL_META_RE = re.compile('<meta name="evernote-url" content="([^"]+)')
 
 
 class SyncTimeoutException(Exception):
@@ -111,6 +134,95 @@ def export(dest, fmt='HTML', query='', timeout_seconds=30*60):
     })
     result = subprocess.check_output(['osascript', '-e', script, '-ss'])
     return str(result, 'utf-8').strip() == 'true'
+
+
+def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
+    """Exports notes with extra metadata.
+    Only HTML format is supported.
+
+    dest should be a string path name to the directory where the notes
+    should be exported; it will be created if necessary.
+
+    query is the Evernote search query for choosing which notes to export.
+    It defaults to an empty string, which should match all notes.
+
+    This method adds two nonstandard meta tags to each of the HTML files:
+    "evernote-notebook" containing the notebook name, and "evernote-url"
+    containing the note link (i.e. an evernote:// url).
+
+    Furthermore, the appearance of any of the notes' note link in any of the
+    notes' bodies is replaced by the filename of the exported note. This way,
+    links between notes will work in the exported files, without access to Evernote.
+
+    Returns False if no notes match the query.
+    """
+    if not fmt == 'HTML':
+        raise ValueError('Enhanced export currently only supports HTML mode.')
+    dest = Path(dest)
+    tmp = dest.joinpath('tmp')
+    tmp.mkdir(parents=True, exist_ok=True)
+    tmp_esc = _script_escape(str(tmp))
+    query_esc = _script_escape(query)
+    script = _EXPORT_BY_NOTE_SCRIPT.substitute({
+        'dest': tmp_esc,
+        'fmt': fmt,
+        'query': query_esc,
+        'timeout': timeout_seconds,
+    })
+    out = subprocess.check_output(['osascript', '-e', script, '-ss'])
+    metas = _EXTRA_META_RE.findall(str(out, 'utf-8'))
+    if not metas:
+        return False
+
+    def available_path(name):
+        prefix = 2
+        candidate = dest.joinpath(name)
+        while candidate.exists():
+            candidate = dest.joinpath(f'{prefix}-{name}')
+            prefix += 1
+        return candidate
+
+    path_metas = {}
+    for path in tmp.glob('*/*.html'):
+        newpath = available_path(path.name)
+        respath = path.parent.joinpath(f'{path.name}.resources')
+        path.rename(newpath)
+        if respath.exists():
+            respath.rename(newpath.with_name(f'{newpath.name}.resources'))
+        path.parent.rmdir()
+
+        index = int(path.parent.name)
+        path_metas[newpath] = metas[index-1]
+        _, link = metas[index-1]
+    tmp.rmdir()
+
+    for path in dest.glob('*.html'):
+        text = path.read_text()
+        notebook, link = path_metas[path]
+        text = text.replace('<head>', f'<head><meta name="evernote-notebook" content="{notebook}"/><meta name="evernote-url" content="{link}"/>', 1)
+        path.write_text(text)
+
+    return True
+
+
+def relink(folder):
+    folder = Path(folder)
+    link_paths = {}
+    for path in folder.glob('**/*.html'):
+        text = path.read_text()
+        match = re.search(URL_META_RE, text)
+        if match:
+            link_paths[match.group(1)] = path.relative_to(folder)
+    # This is extraordinarily inefficient, it would be much faster to
+    # use a regex to find all links and then replace just the ones we found
+    for path in folder.glob('**/*.html'):
+        text = path.read_text()
+        endhead = text.index('</head>')
+        body = text[endhead:]
+        for link, target in link_paths.items():
+            body = body.replace(link, str(target))
+        text = text[:endhead] + body
+        path.write_text(text)
 
 
 def export_by_notebook(dest, fmt='HTML', query='', timeout_seconds=30*60):

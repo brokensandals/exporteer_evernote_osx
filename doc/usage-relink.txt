@@ -1,0 +1,8 @@
+usage: exporteer_evernote_osx relink [-h] path
+
+positional arguments:
+  path        path to directory, which should have been produced by running
+              `exporteer_evernote_osx export -e` previously
+
+optional arguments:
+  -h, --help  show this help message and exit
