@@ -124,7 +124,8 @@ def export(dest, fmt='HTML', query='', timeout_seconds=30*60):
     If there are no matches, the method returns False and there may be
     no output files.
     """
-    dest_esc = _script_escape(dest)
+    dest = Path(dest).resolve()
+    dest_esc = _script_escape(str(dest))
     query_esc = _script_escape(query)
     script = _EXPORT_SCRIPT.substitute({
         'dest': dest_esc,
@@ -158,7 +159,7 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
     """
     if not fmt == 'HTML':
         raise ValueError('Enhanced export currently only supports HTML mode.')
-    dest = Path(dest)
+    dest = Path(dest).resolve()
     tmp = dest.joinpath('tmp')
     tmp.mkdir(parents=True, exist_ok=True)
     tmp_esc = _script_escape(str(tmp))
@@ -241,7 +242,7 @@ def export_by_notebook(dest, fmt='HTML', query='', timeout_seconds=30*60):
         # will include notes from both. Raising an error is easier than
         # trying to parse/modify the query to make it work.
         raise Exception('query must not contain notebook')
-    dest = Path(dest)
+    dest = Path(dest).resolve()
     dest.mkdir(parents=True, exist_ok=True)
     for name in list_notebooks():
         nbdest = dest.joinpath(name)
