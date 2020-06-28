@@ -186,10 +186,23 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
     path_metas = {}
     for path in tmp.glob('*/*.html'):
         newpath = available_path(path.name)
-        respath = path.parent.joinpath(f'{path.name}.resources')
+        respath = None
+        # Previously this code simply appended `.resources` to path.name and
+        # checked if that file exists. However, that causes an error when the
+        # filename exceeds the maximum filename length. And in such cases,
+        # Evernote appears to truncate the stem of the resource folder name
+        # more than it truncates the name of the HTML file, so that the two
+        # do not necessarily match.
+        for p in path.parent.glob('*.resources'):
+            respath = p
         path.rename(newpath)
-        if respath.exists():
-            respath.rename(newpath.with_name(f'{newpath.name}.resources'))
+        if respath:
+            newrespath = newpath.with_name(respath.name)
+            if newrespath.exists():
+                raise NotImplementedError('You have multiple notes whose titles start with the same very long text. '
+                                          'This tool cannot currently deal with that. The problem occurred while '
+                                          f'processing: {respath.name}')
+            respath.rename(newrespath)
         path.parent.rmdir()
 
         index = int(path.parent.name)
