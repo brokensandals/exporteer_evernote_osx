@@ -2,6 +2,7 @@ from pathlib import Path
 import re
 from tempfile import TemporaryDirectory
 import pytest
+import shutil
 from exporteer_evernote_osx import cli
 
 
@@ -109,3 +110,16 @@ def test_export_no_matches():
     with TemporaryDirectory() as rawpath:
         path = Path(rawpath).joinpath('test.enex').resolve()
         assert cli.main(['export', str(path), '-Eq', 'tag:totallybogustag']) == 3
+
+
+def test_merge():
+    with TemporaryDirectory() as rawpath:
+        path = Path(rawpath)
+        dir1 = path.joinpath('dir1')
+        dir2 = path.joinpath('dir2')
+        assert cli.main(['export', str(dir1), '-eq', 'created:month']) == 0
+        count = len(list(dir1.iterdir()))
+        shutil.copytree(dir1, dir2)
+        target = path.joinpath('target')
+        assert cli.main(['merge', str(target), str(dir1), str(dir2)]) == 0
+        assert len(list(target.iterdir())) == count * 2

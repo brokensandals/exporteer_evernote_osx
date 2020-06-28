@@ -1,0 +1,8 @@
+usage: exporteer_evernote_osx merge [-h] destdir srcdirs [srcdirs ...]
+
+positional arguments:
+  destdir     target directory to move files into
+  srcdirs     export directories to combine
+
+optional arguments:
+  -h, --help  show this help message and exit

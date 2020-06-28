@@ -31,6 +31,11 @@ def _notebooks(args):
     return 0
 
 
+def _merge(args):
+    enapp.merge(args.srcdirs, args.destdir[0])
+    return 0
+
+
 def _relink(args):
     enapp.relink(args.path[0])
     return 0
@@ -92,6 +97,13 @@ def main(args=None):
         '-t', '--timeout', nargs='?', type=int,
         help='timeout for export operations (default 1800 = 30 min)')
     p_export.set_defaults(func=_export, query='', timeout=30*60)
+
+    p_merge = subs.add_parser(
+        'merge',
+        help='merge HTML export folders')
+    p_merge.add_argument('destdir', nargs=1, help='target directory to move files into')
+    p_merge.add_argument('srcdirs', nargs='+', help='export directories to combine')
+    p_merge.set_defaults(func=_merge)
 
     p_notebooks = subs.add_parser(
         'notebooks',

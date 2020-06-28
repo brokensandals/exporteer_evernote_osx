@@ -220,6 +220,33 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
     return True
 
 
+def merge(srcdirs, destdir):
+    def available_path(name):
+        name = f'{Path(name).stem[0:70]}.html'
+        prefix = 2
+        candidate = destdir.joinpath(name)
+        while candidate.exists():
+            candidate = destdir.joinpath(f'{prefix}-{name}')
+            prefix += 1
+        return candidate
+
+    destdir = Path(destdir)
+    destdir.mkdir(exist_ok=True, parents=True)
+    for srcdir in srcdirs:
+        srcdir = Path(srcdir)
+        for src in srcdir.glob('*.html'):
+            newpath = available_path(src.name)
+            src.rename(newpath)
+            respath = src.with_name(f'{src.name}.resources')
+            if respath.exists():
+                newrespath = newpath.with_name(f'{newpath.name}.resources')
+                respath.rename(newrespath)
+                if not newrespath.name == respath.name:
+                    text = newpath.read_text()
+                    text = text.replace(quote(respath.name), quote(newrespath.name))
+                    newpath.write_text(text)
+
+
 def relink(folder):
     folder = Path(folder)
     link_paths = {}
