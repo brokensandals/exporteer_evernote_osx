@@ -151,10 +151,6 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
     "evernote-notebook" containing the notebook name, and "evernote-url"
     containing the note link (i.e. an evernote:// url).
 
-    Furthermore, the appearance of any of the notes' note link in any of the
-    notes' bodies is replaced by the filename of the exported note. This way,
-    links between notes will work in the exported files, without access to Evernote.
-
     Returns False if no notes match the query.
     """
     if not fmt == 'HTML':
@@ -176,6 +172,10 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
         return False
 
     def available_path(name):
+        # Evernote's export will go right up to the max filename limit, but
+        # then we have problems when we try to append the '.resources' suffix.
+        # To keep things simple, truncate the name to a more manageable length.
+        name = name[0:70]
         prefix = 2
         candidate = dest.joinpath(name)
         while candidate.exists():
@@ -197,12 +197,12 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
             respath = p
         path.rename(newpath)
         if respath:
-            newrespath = newpath.with_name(respath.name)
-            if newrespath.exists():
-                raise NotImplementedError('You have multiple notes whose titles start with the same very long text. '
-                                          'This tool cannot currently deal with that. The problem occurred while '
-                                          f'processing: {respath.name}')
+            newrespath = newpath.with_name(f'{newpath.name}.resources')
             respath.rename(newrespath)
+            if not newrespath.name == respath.name:
+                text = newpath.read_text()
+                text = text.replace(respath.name, newrespath.name)
+                newpath.write_text(text)
         path.parent.rmdir()
 
         index = int(path.parent.name)
