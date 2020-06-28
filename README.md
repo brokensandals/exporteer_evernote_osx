@@ -55,6 +55,8 @@ Finally, you can replace the `evernote://` links in the HTML files with links to
 exporteer_evernote_osx relink TARGET_DIR
 ```
 
+This may take a while with large numbers of notes - my current implementation is pretty inefficient.
+
 ### More documentation
 
 Full command list and options can be seen in the [doc folder](doc/).
