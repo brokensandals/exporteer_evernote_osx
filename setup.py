@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="exporteer_evernote_osx",
-    version="0.0.4",
+    version="0.0.5",
     author="Jacob Williams",
     author_email="jacobaw@gmail.com",
     description="Exports data from the Mac Evernote app.",
