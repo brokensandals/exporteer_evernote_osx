@@ -5,6 +5,7 @@ import re
 from string import Template
 import subprocess
 import time
+from urllib.parse import quote
 
 
 _START_SYNC_SCRIPT = """
@@ -175,7 +176,7 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
         # Evernote's export will go right up to the max filename limit, but
         # then we have problems when we try to append the '.resources' suffix.
         # To keep things simple, truncate the name to a more manageable length.
-        name = name[0:70]
+        name = f'{Path(name).stem[0:70]}.html'
         prefix = 2
         candidate = dest.joinpath(name)
         while candidate.exists():
@@ -201,7 +202,7 @@ def export_enhanced(dest, fmt='HTML', query='', timeout_seconds=30*60):
             respath.rename(newrespath)
             if not newrespath.name == respath.name:
                 text = newpath.read_text()
-                text = text.replace(respath.name, newrespath.name)
+                text = text.replace(quote(respath.name), quote(newrespath.name))
                 newpath.write_text(text)
         path.parent.rmdir()
 
