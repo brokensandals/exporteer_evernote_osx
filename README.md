@@ -41,6 +41,10 @@ exporteer_evernote_osx export -e TARGET_DIR
 
 In this mode, the tool modifies the HTML files after export to add extra metadata fields containing the notebook name and note URL.
 
+(NOTE: This can be very slow and also bog down your computer.
+I suggest exporting the notes in batches of at most a few hundred, using the `-q` parameter.
+Then you can combine them into one folder before running the `relink` command below.)
+
 After exporting in enhanced mode, you can replace the `evernote://` links in the HTML files with links to the corresponding exported files, by using the `relink` command:
 
 ```bash
